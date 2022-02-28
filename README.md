@@ -1,8 +1,9 @@
 # Controller
 
 This controller is the basis for the functionality of the multi-use call bell system. The function of the system describes as follows:
-* Provides on/off control and status for voice module
-* Provides feedback on the status of the modalities
+* Provides on/off control and ON status for voice module (Switch, LED)
+* Provides the ON status for the call bell (LED)
+* Provides feedback for any signal trigger (LED)
 * Receives, processes and sends call signal to the modalities
 
 Hardware includes:
