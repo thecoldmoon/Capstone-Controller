@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Tutorial : https://www.youtube.com/watch?v=Itic1lFc4Gg&ab_channel=yingshaoxo%27slab
+# Change Input Accordingly
 
 import argparse
 import os
@@ -23,13 +24,6 @@ def callback(indata, frames, time, status):
     if status:
         print(status, file=sys.stderr)
     q.put(bytes(indata))
-
-def checkMicrophone(nameString):
-    p = pyaudio.PyAudio()
-    for ii in range(p.get_device_count()):
-        if nameString in p.get_device_info_by_index(ii).get('name'):
-            return True
-    return False
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument(
@@ -56,8 +50,6 @@ parser.add_argument(
     '-r', '--samplerate', type=int, help='sampling rate')
 args = parser.parse_args(remaining)
 
-print(sd.query_devices(args.device, 'input'))
-
 try:
     if args.model is None:
         args.model = "model"
@@ -67,9 +59,6 @@ try:
         parser.exit(0)
     if args.samplerate is None:
         device_info = sd.query_devices(args.device, 'input')
-        # soundfile expects an int, sounddevice provides a float:
-        if (checkMicrophone('USB Condenser Microphone')):
-            print('CHEESE')
         args.samplerate = int(device_info['default_samplerate'])
    
     model = vosk.Model(args.model)
@@ -78,6 +67,8 @@ try:
         dump_fn = open(args.filename, "wb")
     else:
         dump_fn = None
+
+    print("CHEESE", args.device)
 
     with sd.RawInputStream(samplerate=args.samplerate, blocksize = 8000, device=args.device, dtype='int16',
                             channels=1, callback=callback):

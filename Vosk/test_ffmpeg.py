@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+# python 3 test_ffmpeg.py {AUDIOFILE}
+# Test audio files with the Vosk System
 
 from vosk import Model, KaldiRecognizer, SetLogLevel
 import sys
