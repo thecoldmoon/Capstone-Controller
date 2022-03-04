@@ -7,6 +7,7 @@ import queue
 import sounddevice as sd
 import vosk
 import sys
+import pyaudio
 
 q = queue.Queue()
 
@@ -22,6 +23,13 @@ def callback(indata, frames, time, status):
     if status:
         print(status, file=sys.stderr)
     q.put(bytes(indata))
+
+def checkMicrophone(nameString):
+    p = pyaudio.PyAudio()
+    for ii in range(p.get_device_count()):
+        if nameString in p.get_device_info_by_index(ii).get('name'):
+            return True
+    return False
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument(
@@ -48,6 +56,8 @@ parser.add_argument(
     '-r', '--samplerate', type=int, help='sampling rate')
 args = parser.parse_args(remaining)
 
+print(sd.query_devices(args.device, 'input'))
+
 try:
     if args.model is None:
         args.model = "model"
@@ -58,8 +68,10 @@ try:
     if args.samplerate is None:
         device_info = sd.query_devices(args.device, 'input')
         # soundfile expects an int, sounddevice provides a float:
+        if (checkMicrophone('USB Condenser Microphone')):
+            print('CHEESE')
         args.samplerate = int(device_info['default_samplerate'])
-
+   
     model = vosk.Model(args.model)
 
     if args.filename:
