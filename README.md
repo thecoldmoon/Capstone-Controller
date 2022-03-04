@@ -1,7 +1,7 @@
 # File Structure
- `` main.py `` - Script for prototype controller
- `` test_ffmpeg.py `` - Script for testing audio files
- `` test_microphone.py`` - Script for testing microphone
+ - `` main.py `` - Script for prototype controller
+ - `` test_ffmpeg.py `` - Script for testing audio files
+ - `` test_microphone.py`` - Script for testing microphone
  
  Folders:
  - `` Audiofiles `` - Test audio files
