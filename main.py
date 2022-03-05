@@ -55,7 +55,7 @@ def initiateVoice():
         print ("Please download a model for your language from https://alphacephei.com/vosk/models")
         print ("and unpack as 'model' in the current folder.")
         sys.exit()
-    device_info = sd.query_devices(None, 'input')
+    device_info = sd.query_devices('USB PnP Audio Device: Audio (hw:1,0)', 'input')
     samplerate = int(device_info['default_samplerate'])
    
     model = vosk.Model(model)
@@ -68,7 +68,7 @@ def checkTriggerWords(text):
     return [timer() for i in range(count)]
 
 # INIT
-model, samplerate = initiateVoice() if checkMicrophone('USB Condenser Microphone') else print('Microphone not detected') and sys.exit()
+model, samplerate = initiateVoice() if checkMicrophone('USB PnP Audio Device') else print('Microphone not detected') and sys.exit()
 
 # RUN
 def main():
