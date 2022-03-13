@@ -104,6 +104,8 @@ def main():
                                     repeats.append(word)
                                 else:
                                     repeats = []
+                            else:
+                                repeats = []
                             if len(repeats) >= 3: 
                                 flashTrigger("Voice Repeat")
                                 repeats = []
@@ -112,6 +114,8 @@ def main():
                         if (triggerWordHistory[-1] - triggerWordHistory[0]) >= 4:
                             flashTrigger("Voice Temporal")
                         triggerWordHistory= []
+                else:
+                    print(rec.PartialResult())
                 
             else:
                 GPIO.output(voiceLight,0)
