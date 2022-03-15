@@ -120,7 +120,7 @@ def main():
                         triggerWordHistory= []
                 else:
                     partial =  json.loads(rec.PartialResult())
-                    if partial["partial"] is not "": print("Partial Result: " + partial["partial"])
+                    if partial["partial"] != "": print("Partial Result: " + partial["partial"])
                 
             else:
                 if micAlert is True:
