@@ -75,7 +75,7 @@ def main():
     triggerWordHistory = []
     repeats = []
     
-    with sd.RawInputStream(samplerate=samplerate, blocksize = 800, device=None, dtype='int16',
+    with sd.RawInputStream(samplerate=samplerate, blocksize = 80, device=None, dtype='int16',
                             channels=1, callback=callback):
         rec = vosk.KaldiRecognizer(model, samplerate)
 
