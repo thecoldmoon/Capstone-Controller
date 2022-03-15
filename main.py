@@ -74,6 +74,7 @@ model, samplerate = initiateVoice() if checkMicrophone('USB PnP Audio Device') e
 def main():
     triggerWordHistory = []
     repeats = []
+    micAlert = False
     
     with sd.RawInputStream(samplerate=samplerate, blocksize = 800, device=None, dtype='int16',
                             channels=1, callback=callback):
@@ -83,15 +84,18 @@ def main():
             ## Voice Modality, Check switch is on and mic is plugged in
             if GPIO.input(micSwitch):
                 
-                # Make sure light is on
-                GPIO.output(voiceLight,1)
+                if micAlert is False:
+                    # Make sure light is on
+                    GPIO.output(voiceLight,1)
+                    print("Mic Switch is On, listening...")
+                    micAlert = True
 
                 # Check for voice and trigger
                 data = q.get()
                 if rec.AcceptWaveform(data):
                     text = json.loads(rec.Result())
                     triggerWordHistory += checkTriggerWords(text["text"])
-                    print("RESULT", rec.Result())
+                    print("Result:", rec.Result())
                     print("Trigger word history",triggerWordHistory)
                     print('repeats', repeats)
                     
@@ -116,11 +120,13 @@ def main():
                         triggerWordHistory= []
                 else:
                     partial =  json.loads(rec.PartialResult())
-                    if partial["partial"] is not "": print(partial["partial"])
+                    if partial["partial"] is not "": print("Partial Result: " + partial["partial"])
                 
             else:
-                GPIO.output(voiceLight,0)
-                print("Mic Switch is Off, not listening")
+                if micAlert is True:
+                    GPIO.output(voiceLight,0)
+                    print("Mic Switch is Off, not listening...")
+                    micAlert = False
 
             ## Call Bell Press Modality
             if GPIO.input(callBell) == GPIO.LOW:
@@ -128,4 +134,14 @@ def main():
 
 
 if __name__ == '__main__':
-    pprint(main())
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Interrupted')
+        GPIO.output(voiceLight,0)
+        GPIO.output(triggerLight,0)
+        GPIO.output(callBellLight,0)
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
