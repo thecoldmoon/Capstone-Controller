@@ -23,16 +23,11 @@ rec = KaldiRecognizer(model, wf.getframerate())
 rec.SetWords(True)
 
 while True:
-    data = wf.readframes(4000)
+    data = wf.readframes(8000)
     if len(data) == 0:
         break
     if rec.AcceptWaveform(data):
-        text = json.loads(rec.Result())
-        print(text["text"])
+        print(rec.Result())
     else:
         print(rec.PartialResult())
-        text = json.loads(rec.PartialResult())
 
-text = json.loads(rec.FinalResult())
-if ("nurse" or "help" or "help me") in text["text"]:
-    print("CALL BELL ")

@@ -11,7 +11,7 @@ import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 from pprint import pprint
 from time import sleep     # this lets us have a time delay (see line 15)  
 
-TRIGGER_WORDS = ['help', 'nurse', 'pain']
+TRIGGER_WORDS = ['help', 'nurse', 'pain', 'hello']
 
 # SET UP
 q = queue.Queue()
@@ -75,7 +75,7 @@ def main():
     triggerWordHistory = []
     repeats = []
     
-    with sd.RawInputStream(samplerate=samplerate, blocksize = 8000, device=None, dtype='int16',
+    with sd.RawInputStream(samplerate=samplerate, blocksize = 800, device=None, dtype='int16',
                             channels=1, callback=callback):
         rec = vosk.KaldiRecognizer(model, samplerate)
 
