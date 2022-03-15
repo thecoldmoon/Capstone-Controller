@@ -1,3 +1,8 @@
+# Running Main Program
+ - 1. Connect to Raspberry Pi vis Ethernet cable
+ - 2. SSH in using ``ssh pi@raspberrypi.local`` in terminal
+ - 3. Run ``python3 main.py``
+
 # File Structure
  - `` main.py `` - Script for prototype controller
  - `` test_ffmpeg.py `` - Script for testing audio files
