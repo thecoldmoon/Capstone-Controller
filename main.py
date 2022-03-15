@@ -115,7 +115,7 @@ def main():
                             flashTrigger("Voice Temporal")
                         triggerWordHistory= []
                 else:
-                    print(rec.PartialResult())
+                    print(rec.FinalResult())
                 
             else:
                 GPIO.output(voiceLight,0)
