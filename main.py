@@ -9,7 +9,15 @@ import sounddevice as sd
 from gpiozero import LED
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 from pprint import pprint
-from time import sleep     # this lets us have a time delay (see line 15)  
+import time # this lets us have a time delay (see line 15) 
+import threading
+from thermal_testing import (
+    measure_temp,
+    measure_core_frequency,
+    cooldown,
+    measure_timer,
+    write_measurements
+)
 
 TRIGGER_WORDS = ['help', 'nurse', 'pain', 'hello']
 
@@ -40,7 +48,7 @@ def checkMicrophone(nameString):
 def flashTrigger(reason):
     print("CALL BELL triggered by:",reason)
     GPIO.output(triggerLight,1)
-    sleep(1)
+    time.sleep(1)
     GPIO.output(triggerLight,0)
 
 def callback(indata, frames, time, status):
@@ -67,16 +75,11 @@ def checkTriggerWords(text):
         count += text.count(word)
     return [timer() for i in range(count)]
 
-# INIT
-model, samplerate = initiateVoice() if checkMicrophone('USB PnP Audio Device') else print('Microphone not detected') and sys.exit()
-
-# RUN
-def main():
+def run():
     triggerWordHistory = []
     repeats = []
     timeout = timer()
     micAlert = False
-    
     with sd.RawInputStream(samplerate=samplerate, blocksize = 12000, device=None, dtype='int16',
                             channels=1, callback=callback):
         rec = vosk.KaldiRecognizer(model, samplerate)
@@ -133,6 +136,53 @@ def main():
             ## Call Bell Press Modality
             if GPIO.input(callBell) == GPIO.LOW:
                 flashTrigger("Call Bell")
+
+# INIT
+model, samplerate = initiateVoice() if checkMicrophone('USB PnP Audio Device') else print('Microphone not detected') and sys.exit()
+
+# RUN
+def main():
+    # If a test file path was specified, run the testing procedure.
+    if len(sys.argv) > 1:
+        testingRecordsFilePath = sys.argv[1]
+        cooldown()
+    else:
+        testingRecordsFilePath = False
+
+    # Run the main thread first.
+    runThread = threading.Thread(target=run, args=())
+    runThread.start()
+    
+    if testingRecordsFilePath:
+        times = []
+        temperatures = []
+        frequencies = []
+        
+        testingThread = threading.Thread(
+            name='testingThread', target=measure_timer, args=()
+        )        
+        testingThread.start()
+
+        while testingThread.is_alive():
+            times.append(time.time())
+            temperatures.append(measure_temp())
+            frequencies.append(measure_core_frequency())
+            testingThread.join(1.0)
+
+        # Normalize times.
+        times = [time - times[0] for time in times]
+
+        write_measurements(
+            testingRecordsFilePath, 
+            times, 
+            temperatures, 
+            frequencies
+        )
+    else:
+        print(
+            'No testing records file path argument provided. ', 
+            'In order to enter testing mode, add a file path argument.'
+        )
 
 
 if __name__ == '__main__':

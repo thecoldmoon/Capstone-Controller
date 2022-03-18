@@ -117,32 +117,33 @@ try:
     plt.ylabel('Queue Size')
     
     # giving a title to my graph
-    plt.title('Macbook - Vosk Lightweight Model')
+    plt.title('Raspberry Pi - Vosk Lightweight Model')
     
     # function to show the plot
     plt.show()
-    print("AVERAGE", blocksizes, "AVERAGE",average)
-    plt.scatter(blocksizes, average)
+    plt.scatter(blocksizes, average, label = "Raspberry Pi")
+    plt.scatter(blocksizes, [2.1627296587926508, 1.8548387096774193, 1.1176470588235294, 1.0, 1.0, nan], label = "Macbook")
     # naming the x axis
     plt.xlabel('Block Size')
     # naming the y axis
     plt.ylabel('Average Queue Size for Queue > 0')
     
     # giving a title to my graph
-    plt.title('Macbook - Block Size vs Average Queue Size')
+    plt.title('Block Size vs Average Queue Size')
     
     # function to show the plot
     plt.show()
 
-    print("ZEROS", blocksizes, "ZEROS",average)
-    plt.scatter(blocksizes, zero_ratios)
+    plt.scatter(blocksizes, zero_ratios, label = "Raspberry Pi")
+    plt.scatter(blocksizes, [0.8847898397338978, 0.9534534534534534, 0.9756795422031473, 0.9862745098039216, 0.9938271604938271, 1.0]
+, label = "Macbook")
     # naming the x axis
     plt.xlabel('Block Size')
     # naming the y axis
-    plt.ylabel('Ratio of empty queue')
+    plt.ylabel(" Ratio of Empty Queue")
     
     # giving a title to my graph
-    plt.title('Macbook - Block Size vs Empty Queue occurrence')
+    plt.title('Block Size vs Ratio of Empty Queue')
     
     # function to show the plot
     plt.show()
