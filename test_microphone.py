@@ -4,11 +4,15 @@
 
 import argparse
 import os
+import json
 import queue
 import sounddevice as sd
 import vosk
 import sys
 import pyaudio
+import numpy as np
+import matplotlib.pyplot as plt
+from timeit import default_timer as timer
 
 q = queue.Queue()
 
@@ -50,6 +54,8 @@ parser.add_argument(
     '-r', '--samplerate', type=int, help='sampling rate')
 args = parser.parse_args(remaining)
 
+start_time = timer()
+
 try:
     if args.model is None:
         args.model = "model"
@@ -68,23 +74,77 @@ try:
     else:
         dump_fn = None
 
-    print("CHEESE", sd.query_devices())
+    blocksizes = [800, 2000, 3800, 5200, 8200, 11800]
+    average = []
+    zero_ratios = []
+    for size in blocksizes:
+        stream =  sd.RawInputStream(samplerate=args.samplerate, blocksize = size, device=args.device, dtype='int16',
+                                channels=1, callback=callback)
+        stream.start() 
+        print('#' * 80)
+        print('Press Ctrl+C to stop the recording')
+        print('#' * 80)
+        
+        rec = vosk.KaldiRecognizer(model, args.samplerate)
+        start_time = timer()
+        time_elapsed = np.array([])
+        queue_size = np.array([])
+        avg_size = np.array([])
+        timeout = timer()
 
-    with sd.RawInputStream(samplerate=args.samplerate, blocksize = 8000, device=args.device, dtype='int16',
-                            channels=1, callback=callback):
-            print('#' * 80)
-            print('Press Ctrl+C to stop the recording')
-            print('#' * 80)
+        while True:
+            time_elapsed=np.append(time_elapsed, timer()-start_time)
+            queue_size=np.append(queue_size, q.qsize())
+            data = q.get()
+            
+            if rec.AcceptWaveform(data) or timer()-timeout >3:
+                final =  json.loads(rec.Result())
+                timeout = timer()
+                if final["text"] != "": print("Result: " + final["text"])
+            
+            if dump_fn is not None:
+                dump_fn.write(data)
+            if (timer() - start_time) > 60:
+                plt.plot(time_elapsed, queue_size, label = str(size))
+                average.append(np.mean(queue_size[queue_size != 0]))
+                zero_ratios.append(np.count_nonzero(queue_size==0)/len(time_elapsed))
+                stream.close()
+                break
+    plt.legend()
+    # naming the x axis
+    plt.xlabel('Time Elapsed')
+    # naming the y axis
+    plt.ylabel('Queue Size')
+    
+    # giving a title to my graph
+    plt.title('Macbook - Vosk Lightweight Model')
+    
+    # function to show the plot
+    plt.show()
+    plt.scatter(blocksizes, average)
+    # naming the x axis
+    plt.xlabel('Block Size')
+    # naming the y axis
+    plt.ylabel('Average Queue Size for Queue > 0')
+    
+    # giving a title to my graph
+    plt.title('Macbook - Block Size vs Average Queue Size')
+    
+    # function to show the plot
+    plt.show()
 
-            rec = vosk.KaldiRecognizer(model, args.samplerate)
-            while True:
-                data = q.get()
-                if rec.AcceptWaveform(data):
-                    print(rec.Result())
-                else:
-                    print(rec.PartialResult())
-                if dump_fn is not None:
-                    dump_fn.write(data)
+    plt.scatter(blocksizes, zero_ratios)
+    # naming the x axis
+    plt.xlabel('Block Size')
+    # naming the y axis
+    plt.ylabel('Ratio of empty queue')
+    
+    # giving a title to my graph
+    plt.title('Macbook - Block Size vs Empty Queue occurrence')
+    
+    # function to show the plot
+    plt.show()
+    parser.exit(0)
 
 except KeyboardInterrupt:
     print('\nDone')
