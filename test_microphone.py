@@ -121,6 +121,7 @@ try:
     
     # function to show the plot
     plt.show()
+    print("AVERAGE", blocksizes, "AVERAGE",average)
     plt.scatter(blocksizes, average)
     # naming the x axis
     plt.xlabel('Block Size')
@@ -133,6 +134,7 @@ try:
     # function to show the plot
     plt.show()
 
+    print("ZEROS", blocksizes, "ZEROS",average)
     plt.scatter(blocksizes, zero_ratios)
     # naming the x axis
     plt.xlabel('Block Size')
