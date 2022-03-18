@@ -78,8 +78,8 @@ def checkTriggerWords(text):
 def run():
     triggerWordHistory = []
     repeats = []
-    timeout = timer()
     micAlert = False
+
     with sd.RawInputStream(samplerate=samplerate, blocksize = 12000, device=None, dtype='int16',
                             channels=1, callback=callback):
         rec = vosk.KaldiRecognizer(model, samplerate)
@@ -96,8 +96,7 @@ def run():
 
                 # Check for voice and trigger
                 data = q.get()
-                if rec.AcceptWaveform(data)  or timer()-timeout >3:
-                    timeout = timer()
+                if rec.AcceptWaveform(data):
                     text = json.loads(rec.Result())
                     triggerWordHistory += checkTriggerWords(text["text"])
                     print("Result:", rec.Result())
@@ -120,7 +119,7 @@ def run():
                                 repeats = []
                     # Temporal, triggers if 4 trigger words are heard consecutively within 4 seconds
                     if len(triggerWordHistory) >= 3:
-                        if (triggerWordHistory[-1] - triggerWordHistory[0]) <= 4:
+                        if (triggerWordHistory[-1] - triggerWordHistory[0]) >= 4:
                             flashTrigger("Voice Temporal")
                         triggerWordHistory= []
                 else:
